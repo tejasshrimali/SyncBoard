@@ -18,11 +18,50 @@ import {
   KeyRound, 
   Quote 
 } from 'lucide-react';
-import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
+import { format } from 'date-fns';
 import { sound } from '../services/soundService';
+
+// Concise relative time: minutes (<60m) -> hours (<24h) -> days (>24h)
+function formatRelativeTime(ts, referenceTime) {
+  if (!ts) return 'Just now';
+  const now = referenceTime || Date.now();
+  const diffMs = Math.max(0, now - Number(ts));
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) {
+    return 'Just now';
+  }
+  if (diffMinutes < 60) {
+    return `${diffMinutes}m ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours}h ago`;
+  }
+  if (diffDays < 30) {
+    return `${diffDays}d ago`;
+  }
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths < 12) {
+    return `${diffMonths}mo ago`;
+  }
+  const diffYears = Math.floor(diffDays / 365);
+  return `${diffYears}y ago`;
+}
+
+function getExactDateTooltip(ts) {
+  if (!ts) return '';
+  try {
+    return format(new Date(ts), 'MMM d, yyyy • h:mm a');
+  } catch {
+    return '';
+  }
+}
 
 export default function ClipCard({
   clip,
+  referenceTime,
   onCopy,
   onTogglePin,
   onToggleFavorite,
@@ -46,29 +85,14 @@ export default function ClipCard({
 
   const handleSaveEdit = () => {
     sound.playPop();
+    const words = editContent.trim().split(/\s+/).filter(Boolean).length;
     onUpdate(clip.id, {
       title: editTitle.trim() || clip.title,
       content: editContent.trim() || clip.content,
       charCount: editContent.length,
-      wordCount: editContent.trim().split(/\s+/).filter(Boolean).length,
+      wordCount: words,
     });
     setIsEditing(false);
-  };
-
-  const formatTimestamp = (ts) => {
-    if (!ts) return 'Just now';
-    const date = new Date(ts);
-    try {
-      if (isToday(date)) {
-        return `Today at ${format(date, 'h:mm a')}`;
-      }
-      if (isYesterday(date)) {
-        return `Yesterday at ${format(date, 'h:mm a')}`;
-      }
-      return format(date, 'MMM d, yyyy • h:mm a');
-    } catch {
-      return formatDistanceToNow(date, { addSuffix: true });
-    }
   };
 
   const getCategoryDetails = (cat) => {
@@ -91,6 +115,7 @@ export default function ClipCard({
   };
 
   const categoryMeta = getCategoryDetails(clip.category);
+  const wordCount = clip.wordCount !== undefined ? clip.wordCount : (clip.content?.trim().split(/\s+/).filter(Boolean).length || 1);
 
   return (
     <div className={`card-interactive group relative flex flex-col justify-between bg-theme-surface rounded-3xl border-2 transition-all p-4 sm:p-5 shadow-card hover:shadow-card-hover ${
@@ -103,16 +128,19 @@ export default function ClipCard({
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
           
-          {/* Category Badge & Timestamp */}
+          {/* Category Badge & Relative Timestamp */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border ${categoryMeta.badge}`}>
               {categoryMeta.icon}
               <span>{categoryMeta.label}</span>
             </span>
 
-            <span className="text-[11px] font-semibold text-theme-muted flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {formatTimestamp(clip.createdAt)}
+            <span 
+              title={getExactDateTooltip(clip.createdAt)}
+              className="text-[11px] font-semibold text-theme-muted flex items-center gap-1 cursor-default hover:text-theme-main transition-colors"
+            >
+              <Clock className="w-3 h-3 text-theme-accent" />
+              {formatRelativeTime(clip.createdAt, referenceTime)}
             </span>
           </div>
 
@@ -274,9 +302,9 @@ export default function ClipCard({
       {/* Bottom Action Footer Row */}
       <div className="pt-3 border-t border-theme-border/60 flex items-center justify-between gap-2 mt-auto">
         
-        {/* Left: Char & Word count */}
+        {/* Left: Char & Word count (Explicitly spelled out so never confused with weeks) */}
         <span className="text-[11px] font-medium text-theme-muted">
-          {clip.charCount || clip.content.length} chars • {clip.wordCount || 1} w
+          {clip.charCount || clip.content.length} chars • {wordCount} {wordCount === 1 ? 'word' : 'words'}
         </span>
 
         {/* Right Action Buttons */}

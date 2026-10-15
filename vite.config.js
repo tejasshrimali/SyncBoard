@@ -8,16 +8,44 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icon.svg'],
+      injectRegister: 'auto',
+      includeAssets: [
+        'favicon.svg',
+        'icon.svg',
+        'pwa-192x192.png',
+        'pwa-512x512.png',
+        'maskable-icon-512x512.png'
+      ],
       manifest: {
-        name: 'SyncBoard - Cross-Device Clipboard',
+        id: '/',
+        name: 'SyncBoard',
         short_name: 'SyncBoard',
-        description: 'Permanent persistent clipboard manager with AI categorization and cross-device sync',
-        theme_color: '#52796F',
-        background_color: '#F4F7F4',
+        description: 'Persistent cross-device clipboard manager with AI categorization and real-time cloud sync',
+        theme_color: '#456D5E',
+        background_color: '#F2F5F3',
         display: 'standalone',
         orientation: 'portrait-primary',
+        start_url: '/',
+        scope: '/',
         icons: [
+          {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
           {
             src: '/icon.svg',
             sizes: '192x192 512x512',
@@ -28,6 +56,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}']
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
       }
     })
   ]

@@ -295,6 +295,7 @@ export default function App() {
               <ClipCard
                 key={clip.id}
                 clip={clip}
+                referenceTime={referenceTime}
                 onTogglePin={handleTogglePin}
                 onToggleFavorite={handleToggleFavorite}
                 onDelete={handleDeleteClip}
