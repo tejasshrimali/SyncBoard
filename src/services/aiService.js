@@ -1,6 +1,6 @@
 /**
  * AI Categorization and Smart Title Generator for SyncBoard
- * Integrates with Google Gemini API (gemini-flash-latest) with seamless local heuristic fallback.
+ * Powered by Gemini 3 Flash (`gemini-3.5-flash-lite` / `gemini-flash-lite-latest`) with instant local fallback.
  */
 
 export const CATEGORIES = [
@@ -142,9 +142,18 @@ function localAnalyze(rawText) {
   };
 }
 
+// Resilient model priority chain (blazing fast flash-lite models with high availability)
+const GEMINI_MODELS = [
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.8-flash',
+  'gemini-flash-latest'
+];
+
 /**
  * Main AI Analyzer
- * Tries Gemini API (gemini-flash-latest); otherwise falls back to instant local analysis.
+ * Tries Gemini 3 Flash models with automatic fallback on busy spikes,
+ * and reliable local heuristic engine if completely offline.
  */
 export async function analyzeClip(content) {
   if (!content || !content.trim()) {
@@ -164,9 +173,7 @@ export async function analyzeClip(content) {
     return localAnalyze(raw);
   }
 
-  // Call Gemini API with gemini-flash-latest model
-  try {
-    const prompt = `You are the AI engine for "SyncBoard", a clipboard manager.
+  const prompt = `You are the AI engine for "SyncBoard", a clipboard manager.
 Analyze this clipboard content:
 """
 ${raw.slice(0, 1500)}
@@ -179,41 +186,43 @@ Return ONLY a valid JSON object matching this schema without markdown fences:
   "tags": ["tag1", "tag2"]
 }`;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 100,
-          responseMimeType: "application/json"
-        }
-      })
-    });
+  // Try available models in order of speed and uptime
+  for (const model of GEMINI_MODELS) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 120,
+            responseMimeType: "application/json"
+          }
+        })
+      });
 
-    if (res.ok) {
-      const data = await res.json();
-      const textOutput = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (textOutput) {
-        const parsed = JSON.parse(textOutput);
-        return {
-          title: parsed.title || localAnalyze(raw).title,
-          category: parsed.category || localAnalyze(raw).category,
-          contentType: localAnalyze(raw).contentType,
-          tags: Array.isArray(parsed.tags) ? parsed.tags : localAnalyze(raw).tags
-        };
+      if (res.ok) {
+        const data = await res.json();
+        const textOutput = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (textOutput) {
+          const parsed = JSON.parse(textOutput);
+          return {
+            title: parsed.title || localAnalyze(raw).title,
+            category: parsed.category || localAnalyze(raw).category,
+            contentType: localAnalyze(raw).contentType,
+            tags: Array.isArray(parsed.tags) ? parsed.tags : localAnalyze(raw).tags
+          };
+        }
       }
-    } else {
-      console.warn(`Gemini API returned status ${res.status}:`, await res.text());
+    } catch {
+      // Continue to next model in cascade
     }
-  } catch (err) {
-    console.warn('Gemini AI titling failed, falling back to local analysis:', err);
   }
 
-  // Reliable Fallback
+  // Fallback to local heuristic engine
   return localAnalyze(raw);
 }
