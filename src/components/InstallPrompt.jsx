@@ -24,7 +24,7 @@ export default function InstallPrompt({ promptEvent, onDismiss }) {
           </div>
           <div>
             <h4 className="text-xs sm:text-sm font-extrabold text-theme-main flex items-center gap-1.5">
-              Install SyncBoard PWA
+              Install SyncBoard
               <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-bold">
                 Android & Desktop
               </span>

@@ -220,7 +220,7 @@ export default function ProfileSettingsModal({
                   <Smartphone className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-theme-main">Install App (PWA)</div>
+                  <div className="text-xs font-bold text-theme-main">Install App</div>
                   <div className="text-[11px] text-theme-muted">Add to Home Screen</div>
                 </div>
               </div>

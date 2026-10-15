@@ -67,9 +67,6 @@ export default function Header({
               <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight text-theme-main font-['Outfit']">
                 Sync<span className="text-theme-accent">Board</span>
               </h1>
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-theme-accent-light text-theme-accent border border-theme-border">
-                PWA
-              </span>
             </div>
             <p className="hidden md:block text-xs font-medium text-theme-muted">
               Persistent cross-device clipboard sync
@@ -111,11 +108,11 @@ export default function Header({
             {soundEnabled ? <Volume2 className="w-4 h-4 text-theme-accent" /> : <VolumeX className="w-4 h-4 text-theme-muted" />}
           </button>
 
-          {/* PWA Install Button (If supported/available) */}
+          {/* App Install Button (If supported/available) */}
           {installPrompt && (
             <button
               onClick={onInstallApp}
-              title="Install SyncBoard PWA on Android or Desktop"
+              title="Install SyncBoard on Android or Desktop"
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-sm transition-all duration-200 active:scale-95 animate-pulse"
             >
               <Download className="w-4 h-4" />

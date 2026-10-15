@@ -17,15 +17,15 @@ const DEMO_CLIPS_KEY = 'syncboard_demo_clips_v1';
 const INITIAL_DEMO_CLIPS = [
   {
     id: 'demo-1',
-    title: 'Command: React Vite PWA Scaffold',
-    content: 'npm create vite@latest syncboard -- --template react\ncd syncboard\nnpm install vite-plugin-pwa lucide-react framer-motion',
+    title: 'Command: React Vite App Scaffold',
+    content: 'npm create vite@latest syncboard -- --template react\ncd syncboard\nnpm install lucide-react framer-motion',
     category: 'code',
     contentType: 'code',
     tags: ['npm', 'terminal', 'vite'],
     isPinned: true,
     isFavorite: true,
-    charCount: 122,
-    wordCount: 16,
+    charCount: 104,
+    wordCount: 14,
     createdAt: Date.now() - 1000 * 60 * 15, // 15 mins ago
     updatedAt: Date.now() - 1000 * 60 * 15,
   },
@@ -60,7 +60,7 @@ const INITIAL_DEMO_CLIPS = [
   {
     id: 'demo-4',
     title: 'Tasks: SyncBoard Sprint Goals',
-    content: '- [x] Build pastel themes (Matcha, Sakura, Lavender)\n- [x] Implement real-time Firestore sync\n- [ ] Test Android PWA install flow\n- [ ] Configure custom date pickup timeline',
+    content: '- [x] Build pastel themes (Matcha, Sakura, Lavender)\n- [x] Implement real-time Firestore sync\n- [ ] Test Android app install flow\n- [ ] Configure custom date pickup timeline',
     category: 'tasks',
     contentType: 'markdown',
     tags: ['todo', 'checklist', '4 items'],
