@@ -11,6 +11,7 @@ import TimelineFilterBar from './components/TimelineFilterBar';
 import ClipCard from './components/ClipCard';
 import EmptyState from './components/EmptyState';
 import AuthModal from './components/AuthModal';
+import ProfileSettingsModal from './components/ProfileSettingsModal';
 import InstallPrompt from './components/InstallPrompt';
 import LoadingScreen from './components/LoadingScreen';
 import { subscribeToAuth, logoutUser } from './services/firebase';
@@ -36,6 +37,7 @@ export default function App() {
   // 3. User & Auth State
   const [user, setUser] = useState(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [profileSettingsOpen, setProfileSettingsOpen] = useState(false);
 
   // 4. Clips Data
   const [clips, setClips] = useState([]);
@@ -236,7 +238,7 @@ export default function App() {
         setSoundEnabled={setSoundEnabled}
         user={user}
         onOpenAuth={() => setAuthModalOpen(true)}
-        onLogout={handleLogout}
+        onOpenProfileSettings={() => setProfileSettingsOpen(true)}
         installPrompt={installPromptEvent}
         onInstallApp={() => {
           if (installPromptEvent) {
@@ -313,29 +315,45 @@ export default function App() {
           <div className="flex items-center gap-3 font-medium">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              {user ? 'Firestore Live Sync Connected' : 'Persistent Storage Active'}
+              {user ? 'Firestore Live Sync' : 'Local Storage Mode'}
             </span>
-            {!user && (
-              <>
-                <span>•</span>
-                <button
-                  onClick={() => setAuthModalOpen(true)}
-                  className="hover:text-theme-main transition-colors underline font-bold text-theme-accent"
-                >
-                  Sign In / Register
-                </button>
-              </>
-            )}
+            <span>•</span>
+            <button
+              onClick={() => setProfileSettingsOpen(true)}
+              className="hover:text-theme-main transition-colors underline font-semibold"
+            >
+              Themes & Preferences
+            </button>
           </div>
         </div>
       </footer>
 
-      {/* 6. Auth Modal */}
+      {/* 6. Auth Modal (Sign In / Register) */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         onLoginSuccess={() => {
           // Clips will auto-sync via onAuthStateChanged
+        }}
+      />
+
+      {/* 7. Profile & Settings Modal (Profile > Settings > Themes for Mobile & Desktop) */}
+      <ProfileSettingsModal
+        isOpen={profileSettingsOpen}
+        onClose={() => setProfileSettingsOpen(false)}
+        user={user}
+        currentTheme={theme}
+        setTheme={setTheme}
+        soundEnabled={soundEnabled}
+        setSoundEnabled={setSoundEnabled}
+        onOpenAuth={() => setAuthModalOpen(true)}
+        onLogout={handleLogout}
+        installPrompt={installPromptEvent}
+        onInstallApp={() => {
+          if (installPromptEvent) {
+            installPromptEvent.prompt();
+            setInstallPromptEvent(null);
+          }
         }}
       />
 
